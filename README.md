@@ -13,20 +13,12 @@
 ## 要件
 
 - macOS（Apple Silicon: M1/M2/M3/M4/M5）
-- RAM 16GB以上（24GB以上推奨。16GBでも軽量モデルで動作可能）
+- RAM 8GB以上（24GB以上推奨。8-16GBでも軽量モデルで動作可能）
 
 ## セットアップ
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/cradle-inc/local-ai-dev-kit/main/setup.sh | bash
-```
-
-またはローカルで:
-
-```bash
-git clone https://github.com/cradle-inc/local-ai-dev-kit.git
-cd local-ai-dev-kit
-bash setup.sh
+curl -fsSL https://raw.githubusercontent.com/ikki-dali/local-ai-dev-kit/main/setup.sh | bash
 ```
 
 ## 使い方

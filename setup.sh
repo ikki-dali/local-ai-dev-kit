@@ -41,16 +41,41 @@ TOTAL_MEM_GB=$(( $(sysctl -n hw.memorysize) / 1024 / 1024 / 1024 ))
 echo -e "${BOLD}System: Apple Silicon Mac / ${TOTAL_MEM_GB}GB RAM${NC}"
 echo ""
 
-if [[ $TOTAL_MEM_GB -lt 16 ]]; then
-  echo -e "${RED}Error: 最低16GB RAMが必要です。${NC}"
+if [[ $TOTAL_MEM_GB -lt 8 ]]; then
+  echo -e "${RED}Error: メモリが不足しています（${TOTAL_MEM_GB}GB）。最低8GBが必要です。${NC}"
   exit 1
 fi
 
-# --- Step 1: Homebrew ---
-echo -e "${BOLD}[1/4] Homebrewの確認...${NC}"
+if [[ $TOTAL_MEM_GB -lt 16 ]]; then
+  echo -e "${YELLOW}注意: メモリ${TOTAL_MEM_GB}GBです。最軽量モデル(E2B)をインストールします。${NC}"
+  echo ""
+fi
+
+# --- Step 1: Xcode CLI Tools & Homebrew ---
+echo -e "${BOLD}[1/4] 開発ツールとHomebrewの確認...${NC}"
+
+# xcode-select (git等の基本ツール)
+if ! xcode-select -p &> /dev/null; then
+  echo "  Command Line Toolsをインストールします..."
+  echo "  ※ ポップアップが表示されたら「インストール」を押してください"
+  xcode-select --install 2>/dev/null
+  echo ""
+  echo -e "${YELLOW}  Command Line Toolsのインストールが完了したら、もう一度このスクリプトを実行してください:${NC}"
+  echo "  bash setup.sh"
+  echo ""
+  exit 0
+else
+  echo -e "${GREEN}  OK - Command Line Tools installed${NC}"
+fi
+
+# Homebrew
 if ! command -v brew &> /dev/null; then
-  echo "Homebrewをインストールします..."
+  echo "  Homebrewをインストールします..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # Apple Siliconの場合PATHに追加
+  if [[ -f /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  fi
 else
   echo -e "${GREEN}  OK - Homebrew installed${NC}"
 fi
@@ -94,7 +119,7 @@ elif [[ $TOTAL_MEM_GB -ge 20 ]]; then
   echo -e "  ${YELLOW}Gemma 4 E4B (中量モデル)をダウンロード中...${NC}"
   ollama pull gemma4:e4b
   echo -e "${GREEN}  OK - gemma4:e4b${NC}"
-elif [[ $TOTAL_MEM_GB -ge 16 ]]; then
+elif [[ $TOTAL_MEM_GB -ge 8 ]]; then
   echo "  メモリ ${TOTAL_MEM_GB}GB: 軽量モデルをインストール"
   echo ""
   echo -e "  ${YELLOW}Gemma 4 E2B (軽量モデル)をダウンロード中...${NC}"
