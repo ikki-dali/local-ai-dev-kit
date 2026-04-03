@@ -88,12 +88,18 @@ if [[ $TOTAL_MEM_GB -ge 24 ]]; then
   echo -e "  ${YELLOW}Gemma 4 E4B (軽量モデル)をダウンロード中...${NC}"
   ollama pull gemma4:e4b
   echo -e "${GREEN}  OK - gemma4:e4b${NC}"
+elif [[ $TOTAL_MEM_GB -ge 20 ]]; then
+  echo "  メモリ ${TOTAL_MEM_GB}GB: 中量モデルをインストール"
+  echo ""
+  echo -e "  ${YELLOW}Gemma 4 E4B (中量モデル)をダウンロード中...${NC}"
+  ollama pull gemma4:e4b
+  echo -e "${GREEN}  OK - gemma4:e4b${NC}"
 elif [[ $TOTAL_MEM_GB -ge 16 ]]; then
   echo "  メモリ ${TOTAL_MEM_GB}GB: 軽量モデルをインストール"
   echo ""
-  echo -e "  ${YELLOW}Gemma 4 E4B (軽量モデル)をダウンロード中...${NC}"
-  ollama pull gemma4:e4b
-  echo -e "${GREEN}  OK - gemma4:e4b${NC}"
+  echo -e "  ${YELLOW}Gemma 4 E2B (軽量モデル)をダウンロード中...${NC}"
+  ollama pull gemma4:e2b
+  echo -e "${GREEN}  OK - gemma4:e2b${NC}"
 fi
 
 # --- Step 4: Launcher Script ---
@@ -126,29 +132,47 @@ fi
 MODELS=$(ollama list 2>/dev/null | tail -n +2 | awk '{print $1}')
 GEMMA26B=$(echo "$MODELS" | grep "gemma4:26b" || true)
 GEMMAE4B=$(echo "$MODELS" | grep "gemma4:e4b" || true)
+GEMMAE2B=$(echo "$MODELS" | grep "gemma4:e2b" || true)
 
 echo "利用可能なモデル:"
+IDX=0
 if [[ -n "$GEMMA26B" ]]; then
-  echo -e "  ${GREEN}[1] gemma4:26b${NC} - 高性能（他のアプリを閉じて使用推奨）"
+  IDX=$((IDX+1)); echo -e "  ${GREEN}[$IDX] gemma4:26b${NC} - 高性能（他のアプリを閉じて使用推奨）"
 fi
 if [[ -n "$GEMMAE4B" ]]; then
-  echo -e "  ${GREEN}[2] gemma4:e4b${NC} - 軽量（他のアプリと共存可能）"
+  IDX=$((IDX+1)); echo -e "  ${GREEN}[$IDX] gemma4:e4b${NC} - 中量（他のアプリと共存可能）"
+fi
+if [[ -n "$GEMMAE2B" ]]; then
+  IDX=$((IDX+1)); echo -e "  ${GREEN}[$IDX] gemma4:e2b${NC} - 軽量（16GB Macでも快適）"
 fi
 echo ""
 
-# Default model selection
+# Auto-select best available model
 if [[ -n "$GEMMAE4B" ]]; then
   DEFAULT_MODEL="gemma4:e4b"
+elif [[ -n "$GEMMAE2B" ]]; then
+  DEFAULT_MODEL="gemma4:e2b"
 elif [[ -n "$GEMMA26B" ]]; then
   DEFAULT_MODEL="gemma4:26b"
 fi
 
-read -p "モデルを選択 [1=26b / 2=e4b] (default: 2): " choice
-case $choice in
-  1) MODEL="gemma4:26b" ;;
-  2) MODEL="gemma4:e4b" ;;
-  *) MODEL="$DEFAULT_MODEL" ;;
-esac
+# If only one model, skip selection
+AVAILABLE=0
+[[ -n "$GEMMA26B" ]] && AVAILABLE=$((AVAILABLE+1))
+[[ -n "$GEMMAE4B" ]] && AVAILABLE=$((AVAILABLE+1))
+[[ -n "$GEMMAE2B" ]] && AVAILABLE=$((AVAILABLE+1))
+
+if [[ $AVAILABLE -le 1 ]]; then
+  MODEL="$DEFAULT_MODEL"
+else
+  read -p "モデルを選択 (default: $DEFAULT_MODEL): " choice
+  case $choice in
+    *26b*) MODEL="gemma4:26b" ;;
+    *e4b*) MODEL="gemma4:e4b" ;;
+    *e2b*) MODEL="gemma4:e2b" ;;
+    *) MODEL="$DEFAULT_MODEL" ;;
+  esac
+fi
 
 echo ""
 echo -e "${GREEN}$MODEL で起動します${NC}"
