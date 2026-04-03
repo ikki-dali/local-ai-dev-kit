@@ -37,7 +37,7 @@ if [[ "$(uname -m)" != "arm64" ]]; then
 fi
 
 # --- Memory Check ---
-TOTAL_MEM_GB=$(( $(sysctl -n hw.memorysize) / 1024 / 1024 / 1024 ))
+TOTAL_MEM_GB=$(( $(sysctl -n hw.memsize) / 1024 / 1024 / 1024 ))
 echo -e "${BOLD}System: Apple Silicon Mac / ${TOTAL_MEM_GB}GB RAM${NC}"
 echo ""
 
