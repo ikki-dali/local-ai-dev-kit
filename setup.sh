@@ -76,11 +76,16 @@ fi
 if ! command -v brew &> /dev/null; then
   echo "  Homebrewをインストールします..."
   echo "  ※ パスワードを求められたら入力してください"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  # stdinをTTYから取得（curl | bash対策）
+  BREW_INSTALL="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  /bin/bash -c "$BREW_INSTALL" < /dev/tty
   # インストール後にPATH設定
   if [[ -f /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+    if ! grep -q 'brew shellenv' "$HOME/.zprofile" 2>/dev/null; then
+      echo >> "$HOME/.zprofile"
+      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
+    fi
   fi
 else
   echo -e "${GREEN}  OK - Homebrew installed${NC}"

@@ -18,7 +18,7 @@
 ## セットアップ
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ikki-dali/local-ai-dev-kit/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ikki-dali/local-ai-dev-kit/main/install.sh | bash
 ```
 
 ## 使い方
