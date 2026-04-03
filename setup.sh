@@ -68,13 +68,19 @@ else
   echo -e "${GREEN}  OK - Command Line Tools installed${NC}"
 fi
 
-# Homebrew
+# Homebrew - Apple Siliconの場合PATHに追加（既にインストール済みでもPATH未設定の場合がある）
+if [[ -f /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 if ! command -v brew &> /dev/null; then
   echo "  Homebrewをインストールします..."
+  echo "  ※ パスワードを求められたら入力してください"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  # Apple Siliconの場合PATHに追加
+  # インストール後にPATH設定
   if [[ -f /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
+    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
   fi
 else
   echo -e "${GREEN}  OK - Homebrew installed${NC}"
